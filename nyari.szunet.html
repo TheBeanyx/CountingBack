@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <title>Visszaszámláló a Nyári Szünetig!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+        body {
+            margin: 0;
+            background: #ff8c00;
+            background: linear-gradient(180deg, #ff8c00 0%, #ff4d6d 50%, #594481 100%);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Special Elite', serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .header-text {
+            font-size: 3rem;
+            text-shadow: 4px 4px 0px #333;
+            margin-bottom: 20px;
+            letter-spacing: 3px;
+        }
+
+        .countdown-wrapper {
+            display: flex;
+            gap: 25px;
+            perspective: 1000px;
+        }
+
+        .unit-container {
+            text-align: center;
+        }
+
+        .card {
+            width: 120px;
+            height: 150px;
+            background: #222;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4.5rem;
+            color: #f1f1f1;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            position: relative;
+            border: 2px solid #444;
+        }
+
+        .flip-action {
+            animation: flipRotate 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes flipRotate {
+            0% { transform: rotateX(0deg); }
+            50% { transform: rotateX(90deg); background: #444; }
+            100% { transform: rotateX(360deg); }
+        }
+
+   
+        #s-card {
+            background: #ff4d6d; 
+            border-color: #ff8c00;
+        }
+
+        .label {
+            margin-top: 15px;
+            font-size: 1.2rem;
+            background: rgba(0,0,0,0.3);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        #quote-display {
+            margin-top: 50px;
+            font-size: 1.4rem;
+            max-width: 600px;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 2px dashed white;
+            min-height: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-text">🏖️ KÖZELEG A NYÁR 🏖️</div>
+
+    <div class="countdown-wrapper">
+        <div class="unit-container">
+            <div class="card" id="d-card">00</div>
+            <div class="label">NAP</div>
+        </div>
+        <div class="unit-container">
+            <div class="card" id="h-card">00</div>
+            <div class="label">ÓRA</div>
+        </div>
+        <div class="unit-container">
+            <div class="card" id="m-card">00</div>
+            <div class="label">PERC</div>
+        </div>
+        <div class="unit-container">
+            <div class="card" id="s-card">00</div>
+            <div class="label">MP</div>
+        </div>
+    </div>
+
+    <div id="quote-display">Betöltés...</div>
+
+<script>
+    const target = new Date("June 15, 2026 14:00:00").getTime();
+    
+   const messages = [
+    "🌊 A tenger már küldi a jeleket!",
+    "🍦 Fagyi-riadó hamarosan érvényben!",
+    "😴 Viszlát hajnali 6-os kelés, nemsokára!",
+    "🔥 Égesd el a füzeteket!",
+    "🕶️ A napszemüveged már a fiókban remeg!",
+    "🚫 Iskola: Kikapcsolás folyamatban...",
+    "🌞 100% napsütés várható a szívedben!",
+    "🍉 Görögdinnye szezon karnyújtásnyira!",
+    "📟 Hiba a rendszerben: Tanulás nem található!",
+    "🚀 Kilövés a szabadságba: 3... 2... 1...",
+    "🏖️ Homok a cipőben? Hamarosan alapfelszereltség!",
+    "📅 Már csak pár rubrika a naptárban!",
+    "🌴 Pálmafák és napsütés: az új órarended!",
+    "☀️ A D-vitamin szinted hamarosan az egekbe szökik!",
+    "📚 A könyveid is pihenni akarnak már!",
+    "🌊 Hullámok hátán a szabadság felé!",
+    "🍹 Koktél (alkoholmentes) a kézbe, lábak a magasba!",
+    "🌻 Virágzik a remény: mindjárt itt a szünet!",
+    "⚡ Utolsó hajrá, aztán teljes lemerülés!",
+    "🚲 Bicajra fel, vár az aszfalt!",
+    "🏕️ Sátorozás, csillagos ég, semmi házi feladat!",
+    "🥳 Ünnepeld meg, hogy idáig eljutottál!",
+    "🍦 Hány gombóc lesz az első napon?",
+    "🌅 A naplemente mostantól nem a tanulást jelenti!",
+    "🚶‍♂️ Sétálj ki az iskolából emelt fővel!",
+    "🎒 A táskád is megérdemel egy kis magányt!",
+    "🎶 A nyár slágere már a füledben cseng!",
+    "💦 Csobbanás veszély: 100%!",
+    "🧊 Jéghideg üdítő, forró homok!",
+    "🛌 Alvás délután? Igen, kérlek!",
+    "🛹 Gurulj át a nyárba!",
+    "🎈 Engedd el a stresszt, mint egy lufit!",
+    "🎮 Gaming éjszakák, bűntudat nélkül!",
+    "🧗 Keress új kalandokat a szabadban!",
+    "🛹 Gördeszka, napsütés, szabadság!",
+    "📸 Készítsd a memóriakártyát az élményeknek!",
+    "🛶 Evezz át a gondtalan napokba!",
+    "🔥 Esti tábortűz, mályvacukor, semmi matek!",
+    "🏸 Tollaslabda csaták a kertben!",
+    "🕰️ Az óra ketyeg, a szabadság közeleg!",
+    "🩱 Fürdőruha on, iskolatáska off!",
+    "🗺️ Tervezd meg az utat a boldogság felé!",
+    "🏃 Ne fuss el a feladatok elől, fuss a strand felé!",
+    "✨ Ragyogj fényesebben, mint a júniusi nap!",
+    "🥥 Kókusz illat és napsütés!",
+    "🪁 Repülj el a gondok elől!",
+    "🔋 Akkumulátor töltése: Nyár mód aktív!",
+    "🍒 Cseresznyeszedés és nevetés!",
+    "🥤 Szürcsöld a szabadságot!",
+    "👣 Mezítlábas séták a fűben!",
+    "🦋 Szállj szabadon, mint egy pillangó!",
+    "🎡 Irány a vidámpark!",
+    "📣 Figyelem: A vakáció már a kertek alatt jár!",
+    "🍋 Ha az élet citromot ad, csinálj limonádét a strandon!",
+    "🛸 Elrepítünk a házi feladatok nélküli galaxisba!",
+    "🎢 Hullámvasút az érzelmekben: jön a szünet!",
+    "🌌 Hullócsillagok és éjszakai titkok!",
+    "🍕 Pizza party a barátokkal az udvaron!",
+    "🎾 Tenisz, foci, kosár – mozdulj ki!",
+    "⛱️ Az árnyékoló alatt az élet sokkal szebb!",
+    "🧘 Nyugi, már tényleg nincs sok hátra!",
+    "⚡ Töltsd fel a kreatív energiáidat!",
+    "⛵ Vitorlát bonts a vakáció felé!",
+    "🧳 Csomagolj: a kaland vár!",
+    "🍩 Édes élet, suli nélkül!",
+    "🌈 A szivárvány végén a nyári szünet vár!",
+    "🦜 Egzotikus gondolatok, trópusi hangulat!",
+    "📻 Tekerd fel a hangerőt, vége a csendnek!",
+    "🍓 Eperszezon és szabadság-íz!",
+    "🪁 Magasra törő álmok, hosszú nappalok!",
+    "🧼 Buborékfújás és gondtalanság!",
+    "🕶️ Sötét szemüveg, világos jövő!",
+    "🤿 Merülj el az élményekben!",
+    "🍿 Mozi délutánok, amikor csak akarod!",
+    "🧩 Rakd össze a nyári terveidet!",
+    "🥊 Üsd ki a fáradtságot, jön a feltöltődés!",
+    "🎨 Fesd színesre a szünidődet!",
+    "🥇 Te vagy a bajnok, túlélted a tanévet!",
+    "🍦 Egy gombóc nem gombóc!",
+    "🚛 Pakoljuk el a tankönyveket mélyre!",
+    "🛤️ Sínen vagyunk a nyár felé!",
+    "⛲ Hűsítő csobbanás a városi szökőkútban!",
+    "🌳 Olvass egy fa árnyékában, de ne tankönyvet!",
+    "🧨 Robbanjon a nyári hangulat!",
+    "🧿 Kabala a jó jegyekhez, pihenés a testnek!",
+    "🧬 A DNS-edben van a pihenés vágya!",
+    "🌡️ Emelkedő hőmérséklet, csökkenő stressz!",
+    "🛎️ Csöngessenek be a szabadságnak!",
+    "🧪 Kísérletezz: mennyi fagyit tudsz megenni?",
+    "🧹 Söpörd ki a fejedből a képleteket!",
+    "🛡️ Védőpajzs a suli ellen: aktiválva!",
+    "🏹 Célozd meg a legközelebbi strandot!",
+    "🎻 Lágy nyári szellő zenél a füledbe!",
+    "💎 Te vagy a nyár gyémántja!",
+    "🔌 Húzd ki a dugót, állítsd le a rendszert!",
+    "🕯️ Gyújts fényt a sötét tanulós estéken: már nem kell sokáig!",
+    "🧨 Utolsó visszaszámlálás indul!",
+    "🎁 A nyár a legjobb ajándék!",
+    "🏁 Célvonal a látómezőben!",
+    "🥳 Gratulálok, megcsináltad! Vár a nyár!"
+];
+
+    let lastVals = { d: -1, h: -1, m: -1 };
+
+    function updateCounter() {
+        const now = new Date().getTime();
+        const diff = target - now;
+
+        if (diff <= 0) {
+            document.body.innerHTML = "<h1>🎉 SZABADSÁG! 🎉</h1>";
+            return;
+        }
+
+        const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const s = Math.floor((diff % (1000 * 60)) / 1000);
+
+
+        handleFlip("d-card", d, 'd');
+        handleFlip("h-card", h, 'h');
+        handleFlip("m-card", m, 'm');
+
+
+        document.getElementById("s-card").innerText = s.toString().padStart(2, '0');
+
+        document.getElementById("quote-display").innerText = messages[m % 10];
+    }
+
+    function handleFlip(id, val, key) {
+        const el = document.getElementById(id);
+        const formatted = val.toString().padStart(2, '0');
+
+        if (lastVals[key] !== val) {
+            el.classList.remove("flip-action");
+            void el.offsetWidth; 
+            el.classList.add("flip-action");
+            
+
+            setTimeout(() => {
+                el.innerText = formatted;
+            }, 400);
+            
+            lastVals[key] = val;
+        }
+    }
+
+    setInterval(updateCounter, 1000);
+    updateCounter();
+</script>
+</body>
+</html>
