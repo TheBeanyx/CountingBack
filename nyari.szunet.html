@@ -2,6 +2,7 @@
 <html lang="hu">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visszaszámláló a Nyári Szünetig!</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
@@ -10,14 +11,16 @@
             margin: 0;
             background: #ff8c00;
             background: linear-gradient(180deg, #ff8c00 0%, #ff4d6d 50%, #594481 100%);
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             font-family: 'Special Elite', serif;
-            overflow: hidden;
+            overflow-x: hidden;
             color: white;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .header-text {
@@ -25,12 +28,15 @@
             text-shadow: 4px 4px 0px #333;
             margin-bottom: 20px;
             letter-spacing: 3px;
+            text-align: center;
         }
 
         .countdown-wrapper {
             display: flex;
             gap: 25px;
             perspective: 1000px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
 
         .unit-container {
@@ -62,7 +68,6 @@
             100% { transform: rotateX(360deg); }
         }
 
-   
         #s-card {
             background: #ff4d6d; 
             border-color: #ff8c00;
@@ -87,6 +92,85 @@
             border-radius: 20px;
             border: 2px dashed white;
             min-height: 40px;
+        }
+
+        /* EGYEDI AUDIO VEZÉRLŐ A SAROKBAN */
+        .audio-widget {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            align-items: center;
+            background: rgba(34, 34, 34, 0.85);
+            padding: 12px;
+            border-radius: 50px;
+            border: 2px solid #ff4d6d;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            width: 45px;
+            height: 45px;
+            overflow: hidden;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .audio-widget:hover {
+            width: 180px;
+        }
+
+        #mute-btn {
+            font-size: 1.5rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            min-width: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Egyedi csúszka (piliszka) stílus */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100px;
+            background: transparent;
+            margin-left: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .audio-widget:hover input[type=range] {
+            opacity: 1;
+        }
+
+        /* Csúszka sín */
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+        }
+
+        /* Csúszka gomb */
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: #ff4d6d;
+            cursor: pointer;
+            margin-top: -5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+
+        @media (max-width: 600px) {
+            .header-text { font-size: 1.8rem; }
+            .card { width: 70px; height: 90px; font-size: 2.5rem; }
+            .countdown-wrapper { gap: 10px; }
+            .label { font-size: 0.8rem; }
+            #quote-display { font-size: 1rem; width: 90%; }
+            .audio-widget:hover { width: 150px; }
         }
     </style>
 </head>
@@ -115,10 +199,45 @@
 
     <div id="quote-display">Betöltés...</div>
 
+    <div class="audio-widget">
+        <button id="mute-btn" onclick="toggleMute()">🔇</button>
+        <input type="range" id="volume-slider" min="0" max="1" step="0.05" value="0.5" oninput="changeVolume(this.value)">
+    </div>
+
 <script>
-    const target = new Date("June 19, 2026 14:00:00").getTime();
+    const target = new Date("June 15, 2026 14:00:00").getTime();
     
-   const messages = [
+    // Audio Logika
+    let currentTrack = 1;
+    const audio = new Audio();
+    audio.muted = true;
+    const muteBtn = document.getElementById('mute-btn');
+
+    function playNextTrack() {
+        audio.src = `music${currentTrack}.mp3`;
+        audio.play().catch(e => console.log("Zene indításához kattints a hangszóróra!"));
+        
+        audio.onended = function() {
+            currentTrack = currentTrack >= 5 ? 1 : currentTrack + 1;
+            playNextTrack();
+        };
+    }
+
+    function toggleMute() {
+        if (audio.src === "") {
+            playNextTrack();
+        }
+        audio.muted = !audio.muted;
+        muteBtn.innerText = audio.muted ? "🔇" : "🔊";
+        if (!audio.muted && audio.paused) audio.play();
+    }
+
+    function changeVolume(val) {
+        audio.volume = val;
+        if(val > 0 && audio.muted) toggleMute();
+    }
+    
+    const messages = [
     "🌊 A tenger már küldi a jeleket!",
     "🍦 Fagyi-riadó hamarosan érvényben!",
     "😴 Viszlát hajnali 6-os kelés, nemsokára!",
@@ -237,31 +356,22 @@
         const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const s = Math.floor((diff % (1000 * 60)) / 1000);
 
-
         handleFlip("d-card", d, 'd');
         handleFlip("h-card", h, 'h');
         handleFlip("m-card", m, 'm');
 
-
         document.getElementById("s-card").innerText = s.toString().padStart(2, '0');
-
-        document.getElementById("quote-display").innerText = messages[m % 100];
+        document.getElementById("quote-display").innerText = messages[m % messages.length];
     }
 
     function handleFlip(id, val, key) {
         const el = document.getElementById(id);
         const formatted = val.toString().padStart(2, '0');
-
         if (lastVals[key] !== val) {
             el.classList.remove("flip-action");
             void el.offsetWidth; 
             el.classList.add("flip-action");
-            
-
-            setTimeout(() => {
-                el.innerText = formatted;
-            }, 400);
-            
+            setTimeout(() => { el.innerText = formatted; }, 400);
             lastVals[key] = val;
         }
     }
